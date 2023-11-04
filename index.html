@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <form id="productsForm">
+            <label>Selling Price: </label>
+            <input type="number" name="price" id="price">
+            <label>Product Name: </label>
+            <input type="text" name="pname" id="pname">
+            <label>Choose a category: </label>
+            <select name="category" id="category">
+                <option>Electronics</option>
+                <option>Food</option>
+                <option>Skin Care</option>
+            </select>
+            <button type="submit">Add Product</button>
+        </form>
+        <h2>Products</h2>
+        <h3>Electronic Items</h3>
+        <ul id="electronics"></ul>
+        <h3>Food Items</h3>
+        <ul id="food"></ul>
+        <h3>Skincare Items</h3>
+        <ul id="skincare"></ul>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.0/axios.min.js"></script>
+        <script>
+            document.getElementById('productsForm').addEventListener('submit',function(event) {
+                event.preventDefault();
+                const price = document.getElementById('price').value;
+                const name = document.getElementById('pname').value;
+                const category = document.getElementById('category').value;
+                const order = `${price} - ${name} - ${category}`;
+                const obj = {price, name, category};
+
+                axios.post('https://crudcrud.com/api/c6a166e495364bc8ae6e1663a82b2389/prodcutsList',obj)
+                .then((response) => {
+                    if(category === 'Electronics')
+                    {
+                        electronicsList(response.data._id, price, name, category);
+                    }
+                    if(category === 'Food')
+                    {
+                        foodList(response.data._id, price, name, category);
+                    }
+                    if(category === 'Skin Care')
+                    {
+                        skincareList(response.data._id, price, name, category);
+                    }
+
+                    document.getElementById('price').value = '';
+                    document.getElementById('pname').value = '';
+                })
+                .catch((err) => {
+                    console.log(err);
+                })
+            });
+
+            window.addEventListener("DOMContentLoaded", () => {
+                axios.get('https://crudcrud.com/api/c6a166e495364bc8ae6e1663a82b2389/prodcutsList')
+                .then((response=> {
+                    response.data.forEach((product) => {
+                        if(product.category === 'Electronics')
+                        {
+                            electronicsList(product._id, product.price, product.name, product.category);
+                        }
+                        if(product.category === 'Food')
+                        {
+                            foodList(product._id, product.price, product.name, product.category);
+                        }
+                        if(product.category === 'Skin Care')
+                        {
+                            skincareList(product._id, product.price, product.name, product.category);
+                        }
+                    })
+                }))
+                .catch((err) => {
+                    console.log(err);
+                })
+            })
+
+            function electronicsList(productId, price, name, category) {
+                let childElem = document.createElement('li');
+                childElem.innerHTML = `${price} - ${category} - ${name}
+                                       <button class="delete" data-product="${productId}">Delete Order</button>`;
+                let parentElem = document.getElementById('electronics');
+                parentElem.appendChild(childElem);
+
+                const deleteButton = document.querySelectorAll('.delete');
+                deleteButton.forEach(button => {
+                    button.addEventListener('click', deleteItem);
+                })
+            }
+
+            function foodList(productId, price, name, category) {
+                let childElem = document.createElement('li');
+                childElem.innerHTML = `${price} - ${category} - ${name}
+                                       <button class="delete" data-product="${productId}">Delete Order</button>`;
+                let parentElem = document.getElementById('food');
+                parentElem.appendChild(childElem);
+
+                const deleteButton = document.querySelectorAll('.delete');
+                deleteButton.forEach(button => {
+                    button.addEventListener('click', deleteItem);
+                })
+            }
+
+            function skincareList(productId, price, name, category) {
+                let childElem = document.createElement('li');
+                childElem.innerHTML = `${price} - ${category} - ${name}
+                                       <button class="delete" data-product="${productId}">Delete Order</button>`;
+                let parentElem = document.getElementById('skincare');
+                parentElem.appendChild(childElem);
+
+                const deleteButton = document.querySelectorAll('.delete');
+                deleteButton.forEach(button => {
+                    button.addEventListener('click', deleteItem);
+                })
+            }
+
+            function deleteItem(event) {
+                const productToDelete = event.target.getAttribute('data-product');
+                axios.delete(`https://crudcrud.com/api/c6a166e495364bc8ae6e1663a82b2389/prodcutsList/${productToDelete}`)
+                .then(() => {
+                    event.target.parentElement.remove();
+                })
+                .catch((err) => {
+                    console.log(err);
+                })
+            }
+        </script>
+    </body>
+</html>
